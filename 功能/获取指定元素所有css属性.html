@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			.father{
+				font-size:20px;
+				color:rgb(255, 0, 0);
+			}
+			.child{
+				background:black;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="father">
+			<div class="child">
+				测试
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		var child = document.getElementsByClassName('child')[0];
+		var childStyle = window.getComputedStyle(child).getPropertyValue('background-color');
+		console.log(childStyle);
+	</script>
+</html>
