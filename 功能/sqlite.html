@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<label for="name">
+			名字：
+			<input type="text" name="name" id="name" value="" />
+		</label>
+		<label for="age">
+			年龄：
+			<input type="text" name="age" id="age" value="" />
+		</label>
+		<label for="sex">
+			年龄：
+			<input type="text" name="sex" id="sex" value="" />
+		</label>
+		<input type="button" value="添加" id="add"/>
+		<input type="button" value="确认修改" id="submit"/>
+		
+		<table border="1">
+			<thead>
+				<tr>
+					<th>id</th>
+					<th>姓名</th>
+					<th>年龄</th>
+					<th>性别</th>
+					<th><a href="javascript:void(0);" id="delete">全删</a></th>
+				</tr>
+			</thead>
+			<tbody id="tbody"></tbody>
+		</table>
+	</body>
+	<script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+	<script type="text/javascript">
+		var db = openDatabase('myTel','1.0','test db',1024*100);//数据库名 版本 数据库描述 大小
+		var id;
+		
+		//如果没有数据库表，创建新的数据库表
+		db.transaction(function(tx) {
+			tx.executeSql('create table if not exists TelData(id NUMBER,name TEXT,age TEXT,sex TEXT)',[],function(tx,res) {
+				console.log('建表成功!');
+			}),function(tx,err) {
+				console.log('建表失败!');
+			}
+		})
+		
+		//点击添加操作
+		$("#add").click(function() {
+			db.transaction(function(tx) {
+				tx.executeSql('insert into TelData values(?,?,?,?)',[id,$("#name").val(),$("#age").val(),$("#sex").val()],function(tx,rs) {
+					console.log('添加成功!');
+					showAll()
+				}),function(tx,err) {
+					console.log('添加失败!');
+				}
+			})
+		})
+		
+		//显示所有已添加数据
+		function showAll() {
+			db.transaction(function(tx) {
+				tx.executeSql('select * from TelData',[],function(tx,result) {
+					
+					//自定义id值，如果数据库表没有id，id为0，如果数据库有id，id为末尾数据的id值加1
+					id = result.rows.length == 0 ? result.rows.length : result.rows[result.rows.length - 1].id + 1;
+					var text = '';
+					$.each(result.rows, function(index,value) {
+						text += '<tr><td>' + value.id +'</td><td>' + value.name +'</td><td>' + value.age +'</td><td>' + value.sex +'</td><td><a href="javascript:void(0);" id="' + value.id + '" class="delete">删除</a><a href="javascript:void(0);" id="' + value.id + '" class="edit">修改</a></td></tr>'
+					});
+					$("#tbody").html(text);
+					deleteFn()
+					editFn()
+				})
+			})
+		}
+		showAll()
+		
+		//点击清空操作
+		$("#delete").click(function() {
+			db.transaction(function(tx) {
+				tx.executeSql('delete from TelData',[],function(tx,res) {
+					console.log('删除成功!');
+					showAll()
+				}),function(tx,err) {
+					console.log('删除失败!');
+				}
+			})
+		})
+		
+		//点击删除操作
+		function deleteFn() {
+			$(".delete").click(function() {
+				var id = $(this).attr("id");
+				db.transaction(function(tx) {
+					
+					//条件查询
+					tx.executeSql('delete from TelData where id=(?)',[id],function(tx,res) {
+						console.log('删除成功!');
+						showAll()
+					}),function(tx,err) {
+						console.log('删除失败!');
+					}
+				})
+			})
+		}
+		
+		//点击修改操作
+		function editFn() {
+			$(".edit").click(function() {
+				var id = $(this).attr("id");
+				db.transaction(function(tx) {
+					tx.executeSql('select * from TelData where id=(?)',[id],function(tx,result) {
+						$("#name").val(result.rows[0].name);
+						$("#age").val(result.rows[0].age);
+						$("#sex").val(result.rows[0].sex);
+						$("#submit").attr('infoId',result.rows[0].id);
+					}),function(tx,err) {
+						console.log('删除失败!');
+					}
+				})
+			})
+		}
+		
+		//点击确认修改
+		$("#submit").click(function() {
+			var id = $(this).attr("infoid")
+			db.transaction(function(tx) {
+				
+				//条件修改，where 后面跟的是要修改的那条信息的查询条件，set后面跟的是要修改的字段
+				tx.executeSql('update TelData set name=(?),age=(?),sex=(?) where id=(?)',[$("#name").val(),$("#age").val(),$("#sex").val(),id],function(tx,result) {
+					console.log('修改成功!');
+					$("#submit").attr('infoid','');
+					showAll()
+				}),function(tx,err) {
+					console.log('修改失败!');
+				}
+			})
+		})
+	</script>
+</html>
