@@ -132,6 +132,9 @@
 				//条件修改，where 后面跟的是要修改的那条信息的查询条件，set后面跟的是要修改的字段
 				tx.executeSql('update TelData set name=(?),age=(?),sex=(?) where id=(?)',[$("#name").val(),$("#age").val(),$("#sex").val(),id],function(tx,result) {
 					console.log('修改成功!');
+					$("#name").val('');
+					$("#age").val('');
+					$("#sex").val('');
 					$("#submit").attr('infoid','');
 					showAll()
 				}),function(tx,err) {
