@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<title>Document</title>
+</head>
+<body>   
+    选择文件:<input type="file" id="file1" />
+    			  <br />
+    			  <input type="file" id="file2" />
+    			  <br />
+        <input type="button" id="upload" value="上传" />
+</body>
+<script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+<script src="js/core.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/Ggmd5.js" type="text/javascript" charset="utf-8"></script>
+<script>
+
+	fileChange("file1");
+	
+	fileChange("file2");
+    
+    upload($("#upload"),function(result) {
+    	console.log(result);
+    },"file1","file2");
+    	
+	/*
+	 	fileChange:上传图片后获取图片的md5值函数
+	 	author:李明伟
+	 	参数说明:dom =>图片上传input的dom节点
+	 	特殊说明:此函数需依赖core.js和Ggmd5.js
+	 * */
+	function fileChange(dom) {
+		$("#" + dom).change(function() {
+			var file = document.getElementById(dom).files[0];
+			var fileReader = new FileReader();
+			fileReader.readAsBinaryString(file);
+	        fileReader.onload = function(e) {
+				$("#" + dom).attr('md5',CryptoJS.MD5(CryptoJS.enc.Latin1.parse(e.target.result)).toString());
+	        }
+		})
+	}
+	
+	/*
+	 	upload:上传图片函数
+	 	author:李明伟
+	 	参数说明:obj =>提交jq对象,为空表示没有提交事件直接触发
+	 				  callback =>回调函数，参数为返回的data值，imgName为图片路径的键
+	 	特殊说明:1、此函数需依赖fileChange函数，需先获得stringMd5的值；
+	 				  2、在已有两个参数后面添加对应的input图片上传对应的dom节点
+	 * */
+    function upload(obj,callback) {
+    	var arg = arguments;
+    	if (obj == '') {
+			uploadAjax()
+		} else{
+			obj.click(function () {
+		        uploadAjax()
+		    });
+		}
+    	function uploadAjax() {
+	        var formData = new FormData();
+	        var params = '';
+	        for (var i = 2;i < arg.length;i++) {
+	        	var file = document.getElementById(arg[i]).files[0];
+	        	
+	        	//当有多个图片上传但是用户可以不传所有图片时候，当前节点没有图片，跳出当前循环
+	        	if(!file) {
+	        		continue;
+	        	}
+	        	var str = '"' + file.name +'":{"appName":"product","fileName":"' + file.name +'","fileSize":' + file.size +',"fileType":1,"md5":"' + $("#" + arg[i]).attr('md5') +'","module":"cover"}';
+	        	params += params == '' ? str : ',' + str;
+	        	formData.append("myfile" + i, file); 
+	        }
+	        params = '{' + params + '}';
+	        formData.append("params", params);   
+	        $.ajax({
+	            url: "http://www.upload.com",
+	            type: "POST",
+	            dataType: "json",
+	            data:formData,
+	            contentType: false,//必须false才会自动加上正确的Content-Type
+	            processData: false,//必须false才会避开jQuery对 formdata 的默认处理XMLHttpRequest会对 formdata 进行正确的处理
+	            success: function (data) {
+	                if (data.code = '000') {
+	                	callback(data.entity);
+	                }
+	            },
+	             error: function(res){
+	                alert("上传失败，" + res.msg);
+	            }
+	        });
+	    }
+    }
+    </script>
+</html>
