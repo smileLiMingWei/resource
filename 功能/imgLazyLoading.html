@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    div {
+      height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <img src="" data-scr="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2853553659,1775735885&fm=26&gp=0.jpg" alt="">
+  </div>
+  <div>
+    <img src="" data-scr="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=1603365312,3218205429&fm=26&gp=0.jpg" alt="">
+  </div>
+  <div>
+    <img src="" data-scr="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=1078861629,3747050294&fm=26&gp=0.jpg" alt="">
+  </div>
+  <div>
+    <img src="" data-scr="https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=2583035764,1571388243&fm=26&gp=0.jpg" alt="">
+  </div>
+  <div>
+    <img src="" data-scr="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3461177213,1528805342&fm=26&gp=0.jpg" alt="">
+  </div>
+  <div>
+    <img src="" data-scr="https://ss0.bdstatic.com/70cFvHSh_Q1YnxGkpoWK1HF6hhy/it/u=3387716082,1768697998&fm=26&gp=0.jpg" alt="">
+  </div>
+  <div>
+    <img src="" data-scr="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1963304009,2816364381&fm=26&gp=0.jpg" alt="">
+  </div>
+  <div>
+    <img src="" data-scr="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2986114791,2667770254&fm=26&gp=0.jpg" alt="">
+  </div>
+</body>
+<script>
+  let img = document.getElementsByTagName("img")
+
+  //注意：此方法不兼容ie
+  //IO是浏览器内置的一个API，可以用它实现监听当前元素是否在视口内
+  const observer = new IntersectionObserver((changes) => {
+    for (let i = 0,len = changes.length;i<len;i++) {
+      let change = changes[i]
+      if (change.isIntersecting) {//返回一个布尔值，表示当前是否相交
+        const imgElement = change.target
+        imgElement.src = imgElement.getAttribute("data-scr");
+        observer.unobserve(imgElement);//停止观察此节点
+      }
+    }
+  })
+
+  img = [...img]
+  img.forEach(element => {
+    observer.observe(element)//observe只能接收一个节点信息
+  });
+  
+
+</script>
+</html>
